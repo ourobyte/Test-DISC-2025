@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mirror Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap');
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #050505;
+            color: #e0e0e0;
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Efek Cermin Retak/Misterius */
+        .mirror-container {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.02);
+        }
+
+        .option-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .option-btn:active {
+            transform: translateY(1px);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            border-left: 4px solid;
+        }
+        
+        /* Warna spesifik untuk hasil */
+        .result-aggression { border-color: #ef4444; } /* Merah */
+        .result-narcissism { border-color: #eab308; } /* Emas */
+        .result-manipulation { border-color: #a855f7; } /* Ungu */
+        .result-avoidance { border-color: #64748b; } /* Abu-abu */
+
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div class="mirror-container w-full max-w-2xl rounded-xl p-8 min-h-[500px] flex flex-col justify-center relative">
+        
+        <!-- Halaman Awal -->
+        <div id="start-screen" class="text-center fade-in">
+            <h1 class="text-5xl mb-2 text-gray-200 tracking-wider">DARK MIRROR</h1>
+            <p class="text-gray-500 mb-8 italic">"Alam bawah sadar berbicara lewat simbol."</p>
+            
+            <div class="space-y-4 text-left bg-black/30 p-6 rounded-lg border border-white/5 mb-8 text-sm">
+                <p>🔮 <strong>Instruksi:</strong></p>
+                <p>Kamu akan masuk ke dalam 10 skenario mimpi. Jangan berpikir logis. Pilihlah jawaban yang pertama kali muncul di benakmu, seaneh apapun itu.</p>
+                <p class="text-xs text-gray-400 mt-2">*Tes ini menggunakan metode proyeksi psikologis untuk melihat sisi dominan kepribadianmu yang tersembunyi.*</p>
+            </div>
+
+            <button onclick="startTest()" class="px-8 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-white tracking-widest uppercase text-sm transition-all">
+                Masuk ke Dalam Cermin
+            </button>
+        </div>
+
+        <!-- Halaman Pertanyaan -->
+        <div id="quiz-screen" class="hidden fade-in">
+            <div class="flex justify-between items-center mb-6 text-xs text-gray-500 uppercase tracking-widest">
+                <span>Imajinasi</span>
+                <span id="question-counter">01 / 10</span>
+            </div>
+
+            <h2 id="question-text" class="text-2xl text-gray-100 mb-8 leading-relaxed font-light">
+                <!-- Pertanyaan akan muncul di sini -->
+            </h2>
+
+            <div id="options-container" class="space-y-4">
+                <!-- Opsi jawaban akan muncul di sini -->
+            </div>
+        </div>
+
+        <!-- Halaman Hasil -->
+        <div id="result-screen" class="hidden fade-in text-center">
+            <h3 class="text-xl text-gray-400 mb-2 uppercase tracking-widest">Simbol Terungkap</h3>
+            <h1 id="result-title" class="text-4xl font-bold mb-6 text-white"></h1>
+            
+            <div id="result-desc-container" class="result-card bg-black/40 p-6 rounded text-left mb-8">
+                <p id="result-description" class="text-gray-300 leading-relaxed mb-4"></p>
+                <div class="mt-4 pt-4 border-t border-white/10">
+                    <p class="text-xs text-gray-500 uppercase mb-2">Saran Refleksi:</p>
+                    <p id="result-advice" class="text-sm text-gray-400 italic"></p>
+                </div>
+            </div>
+
+            <button onclick="restartTest()" class="text-sm text-gray-500 hover:text-white underline transition-colors">
+                Berkaca Lagi (Ulangi Tes)
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Data Pertanyaan Simbolis ---
+        // Logika Proyeksi:
+        // A: Aggression (Kekerasan/Dominasi langsung) -> Simbol: Api, Pedang, Menghancurkan.
+        // N: Narcissism (Pusat perhatian/Kekaguman diri) -> Simbol: Mahkota, Cermin, Emas.
+        // M: Manipulation (Mengendalikan di balik layar/Licik) -> Simbol: Kunci, Topeng, Jalan rahasia.
+        // V: Avoidance (Lari/Menghindar/Takut) -> Simbol: Kabut, Selimut, Jalan memutar.
+
+        const questions = [
+            {
+                text: "Kamu sedang berjalan di lorong gelap sebuah kastil tua. Tiba-tiba, sebuah pintu besar menghalangi jalanmu. Apa yang kamu lakukan?",
+                options: [
+                    { text: "Mendobraknya sekuat tenaga hingga hancur.", type: 'A' }, 
+                    { text: "Mencari lubang kunci dan mencoba mengakalinya dengan kawat.", type: 'M' }, 
+                    { text: "Berbalik arah, mungkin ada jalan lain yang lebih aman.", type: 'V' }, 
+                    { text: "Berteriak memerintahkan penjaga untuk membukanya untukku.", type: 'N' } 
+                ]
+            },
+            {
+                text: "Kamu menemukan sebuah peti harta karun, namun saat dibuka, isinya kosong melompong. Apa reaksi pertamamu?",
+                options: [
+                    { text: "Mengisi peti itu dengan batu lalu memberikannya ke orang lain sebagai tipuan.", type: 'M' }, 
+                    { text: "Marah dan menendang peti itu sampai rusak.", type: 'A' }, 
+                    { text: "Merasa sangat malu dan takut orang lain tahu aku gagal menemukannya.", type: 'N' }, 
+                    { text: "Lega, setidaknya aku tidak perlu membawa beban berat pulang.", type: 'V' } 
+                ]
+            },
+            {
+                text: "Di tengah hutan, kamu melihat seekor serigala yang terluka menatapmu. Apa yang kamu pikirkan?",
+                options: [
+                    { text: "Kasihan, tapi aku akan meninggalkannya diam-diam agar tidak digigit.", type: 'V' }, 
+                    { text: "Ini kesempatan bagus untuk menaklukkannya dan menjadikannya pelayanku.", type: 'N' }, 
+                    { text: "Aku akan memancingnya ke perangkap.", type: 'M' }, 
+                    { text: "Aku akan mengakhiri penderitaannya sekarang juga.", type: 'A' }, 
+                ]
+            },
+            {
+                text: "Kamu sedang melukis potret wajahmu sendiri, tapi ada satu goresan kuas yang salah. Apa yang kamu lakukan?",
+                options: [
+                    { text: "Merobek kanvasnya. Jika tidak sempurna, lebih baik hancur sekalian.", type: 'A' }, 
+                    { text: "Mengubah goresan itu menjadi hiasan indah, agar orang mengira itu disengaja.", type: 'M' }, 
+                    { text: "Membiarkannya dan menyimpannya di gudang tertutup kain.", type: 'V' }, 
+                    { text: "Tetap memajangnya. Wajahku terlalu indah untuk rusak hanya karena satu goresan.", type: 'N' } 
+                ]
+            },
+            {
+                text: "Sebuah badai besar datang menerjang desamu. Semua orang panik. Dimana posisimu?",
+                options: [
+                    { text: "Berdiri di tempat tinggi, memastikan semua orang melihat ketenanganku.", type: 'N' }, 
+                    { text: "Bersembunyi di bunker bawah tanah sendirian sampai badai reda.", type: 'V' }, 
+                    { text: "Mengambil alih komando dengan membentak orang-orang yang lamban.", type: 'A' }, 
+                    { text: "Menganalisa situasi untuk melihat siapa yang bisa kumanfaatkan untuk keselamatanku.", type: 'M' }, 
+                ]
+            },
+            // --- Pertanyaan Tambahan ---
+            {
+                text: "Di tepi jurang, kamu melihat jembatan satu-satunya telah putus. Apa yang kamu lakukan?",
+                options: [
+                    { text: "Menebang pohon terdekat dan memaksanya menjadi jembatan darurat.", type: 'A' }, // Agresi/Forceful solution
+                    { text: "Menunggu di tepi, yakin nanti pasti ada helikopter atau bantuan datang untukku.", type: 'N' }, // Narsisme/Entitlement
+                    { text: "Membujuk pengelana lain untuk mencoba melompat duluan, sebagai tes.", type: 'M' }, // Manipulasi/Using others
+                    { text: "Pulang saja. Alam semesta memberitahuku untuk tidak pergi ke sana.", type: 'V' } // Avoidance/Giving up
+                ]
+            },
+            {
+                text: "Di kegelapan malam, kamu mendengar bisikan-bisikan aneh menyebut namamu. Apa reaksimu?",
+                options: [
+                    { text: "Menutup telinga rapat-rapat dan bernyanyi keras untuk mengusir suara itu.", type: 'V' }, // Avoidance
+                    { text: "Tersenyum. Bahkan hantu pun membicarakanku. Aku memang terkenal.", type: 'N' }, // Narsisme
+                    { text: "Berhenti dan menguping diam-diam, siapa tahu ada informasi rahasia.", type: 'M' }, // Manipulasi/Information gathering
+                    { text: "Berteriak lantang ke arah kegelapan: 'Keluar kalian! Hadapi aku!'", type: 'A' } // Agresi/Konfrontasi
+                ]
+            },
+            {
+                text: "Ada satu buah Apel Emas di puncak pohon yang sangat tinggi. Banyak yang menginginkannya.",
+                options: [
+                    { text: "Menyebarkan rumor bahwa apel itu beracun, lalu mengambilnya saat saingan pergi.", type: 'M' }, // Manipulasi/Deception
+                    { text: "Menebang pohonnya. Jika aku tidak bisa memanjat, pohonnya yang harus turun.", type: 'A' }, // Agresi/Destructive
+                    { text: "Menyuruh orang lain memanjat dan mengambilkannya untukku.", type: 'N' }, // Narsisme/Exploitation
+                    { text: "Mundur perlahan. Persaingannya terlalu ketat, aku tidak akan menang.", type: 'V' } // Avoidance/Low self-esteem
+                ]
+            },
+            {
+                text: "Kamu diundang ke pesta topeng kerajaan, tapi topengmu hilang/rusak.",
+                options: [
+                    { text: "Masuk tanpa topeng dengan tatapan menantang. Siapa yang berani melarangku?", type: 'A' }, // Agresi/Defiance
+                    { text: "Mencuri topeng salah satu tamu lain saat mereka lengah di toilet.", type: 'M' }, // Manipulasi/Theft
+                    { text: "Batal masuk dan pulang. Aku tidak bisa tampil jika tidak sempurna.", type: 'V' }, // Avoidance/Shame
+                    { text: "Membuat topeng darurat yang sangat mencolok agar semua mata tertuju padaku.", type: 'N' } // Narsisme/Attention seeking
+                ]
+            },
+            {
+                text: "Kamu terbangun di dalam kotak kaca transparan. Orang-orang di luar hanya menontonmu.",
+                options: [
+                    { text: "Mulai menari atau berpose dramatis. Ini panggungku, mereka penontonku.", type: 'N' }, // Narsisme/Exhibitionism
+                    { text: "Duduk memeluk lutut di sudut paling gelap, berharap mereka bosan dan pergi.", type: 'V' }, // Avoidance/Withdrawal
+                    { text: "Memukul kaca itu bertubi-tubi dengan kepalan tangan sampai retak.", type: 'A' }, // Agresi/Physical reaction
+                    { text: "Menulis pesan minta tolong palsu di kaca untuk memancing rasa iba penjaga.", type: 'M' } // Manipulasi/Playing emotions
+                ]
+            }
+        ];
+
+        const resultsData = {
+            'A': {
+                title: "THE TYRANT (Sang Tiran)",
+                desc: "Pilihanmu yang cenderung konfrontatif dan destruktif dalam skenario imajiner menunjukkan adanya agresi terpendam. Kamu melihat hambatan sebagai sesuatu yang harus dihancurkan, bukan diselesaikan. Simbol 'mendobrak', 'menebang', atau 'memukul' menunjukkan toleransi frustrasi yang rendah.",
+                advice: "Energi besar ini bisa menjadi kepemimpinan yang kuat jika dikendalikan, tapi akan menjadi kehancuran jika dibiarkan meledak.",
+                colorClass: "result-aggression"
+            },
+            'N': {
+                title: "THE NARCISSIST (Sang Ego)",
+                desc: "Pilihanmu yang berpusat pada citra diri, status, dan kekaguman dalam skenario imajiner menunjukkan benih narsisme. Kamu cenderung menempatkan diri di pusat semesta (main character), bahkan dalam situasi bahaya. Rasa takut terbesarmu bukanlah bahaya itu sendiri, tapi terlihat 'biasa saja' atau 'lemah'.",
+                advice: "Cobalah melihat dunia dari kacamata 'orang figuran'. Terkadang, menjadi biasa saja itu membebaskan.",
+                colorClass: "result-narcissism"
+            },
+            'M': {
+                title: "THE SCHEMER (Sang Manipulator)",
+                desc: "Jawabanmu penuh strategi, tipuan, dan jalan memutar. Ini melambangkan sifat manipulatif. Dalam imajinasimu, kamu jarang memilih jalan yang lurus dan jujur. Kamu lebih suka mengendalikan narasi, menutupi kesalahan, atau memanfaatkan orang lain demi keuntungan pribadi.",
+                advice: "Kecerdasanmu tinggi, tapi menggunakannya untuk menipu diri sendiri atau orang lain hanya akan membuatmu kesepian di puncak.",
+                colorClass: "result-manipulation"
+            },
+            'V': {
+                title: "THE SHADOW (Sang Penghindar)",
+                desc: "Dalam setiap bahaya atau konflik imajiner, kamu memilih untuk mundur, sembunyi, atau lari. Ini adalah cerminan dari sifat 'Avoidant'. Kamu cenderung membiarkan masalah membusuk daripada menghadapinya, dan seringkali berlindung di balik rasa aman palsu atau fantasi.",
+                advice: "Rasa aman itu ilusi. Keberanian bukanlah ketiadaan rasa takut, melainkan tindakan meski sedang ketakutan.",
+                colorClass: "result-avoidance"
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let scores = { 'A': 0, 'N': 0, 'M': 0, 'V': 0 };
+
+        // --- Fungsi Kontrol ---
+
+        function startTest() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            // Update UI text
+            document.getElementById('question-counter').innerText = `0${currentQuestionIndex + 1} / ${questions.length}`;
+            document.getElementById('question-text').innerText = question.text;
+
+            // Clear old options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            // Acak urutan jawaban agar tidak terpola
+            const shuffledOptions = question.options.sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full text-left p-4 rounded bg-white/5 border border-white/10 text-gray-300 hover:text-white";
+                btn.innerText = opt.text;
+                btn.onclick = () => handleAnswer(opt.type);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(type) {
+            // Tambah skor
+            scores[type]++;
+
+            // Lanjut ke pertanyaan berikutnya
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                // Efek transisi halus
+                const quizScreen = document.getElementById('quiz-screen');
+                quizScreen.classList.remove('fade-in');
+                void quizScreen.offsetWidth; // trigger reflow
+                quizScreen.classList.add('fade-in');
+                
+                renderQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            // Hitung skor tertinggi
+            let maxScore = -1;
+            let resultType = '';
+
+            for (const [type, score] of Object.entries(scores)) {
+                if (score > maxScore) {
+                    maxScore = score;
+                    resultType = type;
+                }
+            }
+
+            // Jika skor seimbang, kita ambil default (atau bisa dibuat logika campuran)
+            const resultData = resultsData[resultType];
+
+            // Render Hasil
+            const titleEl = document.getElementById('result-title');
+            const containerEl = document.getElementById('result-desc-container');
+            
+            titleEl.innerText = resultData.title;
+            document.getElementById('result-description').innerText = resultData.desc;
+            document.getElementById('result-advice').innerText = resultData.advice;
+
+            // Update styling berdasarkan tipe hasil
+            titleEl.className = `text-4xl font-bold mb-6 ${getColorText(resultType)}`;
+            containerEl.className = `result-card bg-black/40 p-6 rounded text-left mb-8 ${resultData.colorClass}`;
+        }
+
+        function getColorText(type) {
+            if (type === 'A') return 'text-red-500';
+            if (type === 'N') return 'text-yellow-500';
+            if (type === 'M') return 'text-purple-500';
+            return 'text-gray-400';
+        }
+
+        function restartTest() {
+            currentQuestionIndex = 0;
+            scores = { 'A': 0, 'N': 0, 'M': 0, 'V': 0 };
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
