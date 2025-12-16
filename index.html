@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tes Kepribadian DISC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+        }
+        .radio-custom {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        /* Highlight row on hover to make reading easier */
+        .option-row:hover {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header Section with Contact Info -->
+    <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="text-center md:text-left mb-2 md:mb-0">
+                <h1 class="text-2xl font-bold tracking-wide">TES KEPRIBADIAN DISC</h1>
+                <p class="text-blue-200 text-sm">Kenali Potensi Diri Anda</p>
+            </div>
+            <div class="text-center md:text-right text-sm">
+                <!-- Text removed, only button remains -->
+                <a href="https://wa.me/6281410101477" target="_blank" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-full transition font-semibold">
+                    <i class="fab fa-whatsapp"></i> Chat WhatsApp
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Intro Card -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 border-l-4 border-blue-600">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Instruksi Pengerjaan</h2>
+            <div class="space-y-2 text-gray-600">
+                <p>1. Isi data diri Anda di bawah ini.</p>
+                <p>2. Terdapat <strong>24 nomor</strong> soal.</p>
+                <p>3. Pada setiap nomor, pilih:</p>
+                <ul class="list-disc list-inside ml-4 text-sm bg-gray-50 p-3 rounded">
+                    <li><span class="font-bold text-blue-600">(P)</span>: Pernyataan yang <strong>PALING</strong> menggambarkan diri Anda.</li>
+                    <li><span class="font-bold text-red-500">(T)</span>: Pernyataan yang <strong>PALING TIDAK</strong> menggambarkan diri Anda.</li>
+                </ul>
+                <p class="text-xs text-gray-500 italic mt-2">*Anda harus memilih satu P dan satu T untuk setiap nomor.</p>
+            </div>
+
+            <!-- User Info Form -->
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="userName" class="w-full border-gray-300 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" placeholder="Contoh: Budi Santoso">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                    <input type="date" id="testDate" class="w-full border-gray-300 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions Container -->
+        <form id="discForm" onsubmit="calculateScore(event)">
+            <div id="questionsContainer" class="space-y-6">
+                <!-- Javascript will inject questions here -->
+            </div>
+
+            <!-- Error Message Container -->
+            <div id="errorMessage" class="hidden mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Perhatian!</strong>
+                <span class="block sm:inline" id="errorText">Mohon lengkapi semua jawaban.</span>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-8 text-center">
+                <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-4 px-10 rounded-full shadow-lg transform transition hover:scale-105 duration-200 text-lg">
+                    <i class="fas fa-calculator mr-2"></i> Kirim Jawaban
+                </button>
+            </div>
+        </form>
+
+        <!-- Result Section (Hidden initially) -->
+        <div id="resultSection" class="hidden mt-10 bg-white rounded-xl shadow-2xl overflow-hidden">
+            <div class="bg-gray-800 text-white p-4 text-center">
+                <h2 class="text-2xl font-bold">Hasil Analisa DISC</h2>
+                <p id="resultName" class="text-gray-300"></p>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Table Scores -->
+                    <div>
+                        <h3 class="font-bold text-lg mb-4 text-center border-b pb-2">Rincian Skor</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-3">Tipe</th>
+                                        <th class="px-6 py-3 text-center">Most (P)</th>
+                                        <th class="px-6 py-3 text-center">Least (T)</th>
+                                        <th class="px-6 py-3 text-center">Change (P-T)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scoreTableBody">
+                                    <!-- JS generates rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Summary / Chart Placeholder -->
+                    <div class="flex flex-col justify-center items-center bg-blue-50 rounded-lg p-6">
+                        <h3 class="font-bold text-lg mb-2 text-blue-900">Kepribadian Dominan Anda</h3>
+                        <div id="dominantType" class="text-5xl font-extrabold text-blue-600 my-4">-</div>
+                        <p class="text-center text-sm text-gray-600 px-4">
+                            Hasil ini berdasarkan perhitungan skor tertinggi pada kolom "Most" (Paling Menggambarkan).
+                        </p>
+                        <div class="mt-4 text-xs text-gray-500">
+                            *D = Dominance, I = Influence, S = Steadiness, C = Compliance
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 flex flex-col md:flex-row justify-center gap-3">
+                    <button id="waButton" onclick="sendToWhatsapp()" class="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg shadow-lg font-bold flex items-center justify-center transition hover:scale-105">
+                        <i class="fab fa-whatsapp text-2xl mr-2"></i> Kirim Hasil ke WhatsApp
+                    </button>
+                    
+                    <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-lg shadow font-medium flex items-center justify-center">
+                        <i class="fas fa-print mr-2"></i> Cetak / PDF
+                    </button>
+                    
+                    <button onclick="location.reload()" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-6 rounded-lg shadow font-medium">
+                        Ulangi Tes
+                    </button>
+                </div>
+                <p class="text-center text-xs text-gray-400 mt-4 italic">Klik tombol WhatsApp untuk mengirim hasil ini langsung ke nomor Admin.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <p class="mb-2">Untuk konsultasi lebih lanjut mengenai hasil tes ini, hubungi:</p>
+            <!-- Text removed -->
+            <div class="mt-4">
+                <a href="https://wa.me/6281410101477" class="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition mx-2 font-bold text-lg">
+                    <i class="fab fa-whatsapp fa-lg"></i> +62 814-1010-1477
+                </a>
+            </div>
+            <p class="mt-8 text-xs text-gray-600">&copy; 2025 All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Javascript Logic -->
+    <script>
+        // Data Soal dari Dokumen yang diunggah
+        // Pattern: A=D, B=I, C=S, D=C
+        const questions = [
+            {
+                id: 1,
+                options: [
+                    { text: "Saya suka memimpin dan mengambil keputusan cepat", type: 'D' },
+                    { text: "Saya suka membantu dan bersikap ramah", type: 'I' },
+                    { text: "Saya suka ketenangan dan rutinitas", type: 'S' },
+                    { text: "Saya suka ketelitian dan data", type: 'C' }
+                ]
+            },
+            {
+                id: 2,
+                options: [
+                    { text: "Berani mengambil risiko", type: 'D' },
+                    { text: "Suka bekerja dengan banyak orang", type: 'I' },
+                    { text: "Sabar dan stabil", type: 'S' },
+                    { text: "Perfeksionis dan terstruktur", type: 'C' }
+                ]
+            },
+            {
+                id: 3,
+                options: [
+                    { text: "Tegas saat menghadapi masalah", type: 'D' },
+                    { text: "Optimis dan penuh energi", type: 'I' },
+                    { text: "Pendengar yang baik", type: 'S' },
+                    { text: "Analitis dan penuh kehati-hatian", type: 'C' }
+                ]
+            },
+            {
+                id: 4,
+                options: [
+                    { text: "Fokus pada hasil", type: 'D' },
+                    { text: "Senang berbicara dan membangun suasana", type: 'I' },
+                    { text: "Mengutamakan harmoni", type: 'S' },
+                    { text: "Mengikuti aturan secara konsisten", type: 'C' }
+                ]
+            },
+            {
+                id: 5,
+                options: [
+                    { text: "Kompetitif", type: 'D' },
+                    { text: "Persuasif", type: 'I' },
+                    { text: "Setia dan mendukung", type: 'S' },
+                    { text: "Berorientasi prosedur", type: 'C' }
+                ]
+            },
+            {
+                id: 6,
+                options: [
+                    { text: "Dominan dan langsung", type: 'D' },
+                    { text: "Ekspresif dan mudah bergaul", type: 'I' },
+                    { text: "Stabil dan sabar", type: 'S' },
+                    { text: "Teliti dan sistematis", type: 'C' }
+                ]
+            },
+            {
+                id: 7,
+                options: [
+                    { text: "Tegas dalam mengatur orang", type: 'D' },
+                    { text: "Suka bercerita dan tampil", type: 'I' },
+                    { text: "Toleran dan pendiam", type: 'S' },
+                    { text: "Berpikir kritis", type: 'C' }
+                ]
+            },
+            {
+                id: 8,
+                options: [
+                    { text: "Cepat mengambil tindakan", type: 'D' },
+                    { text: "Mudah menghidupkan suasana", type: 'I' },
+                    { text: "Tenang dalam tekanan", type: 'S' },
+                    { text: "Menjaga kualitas dan standar", type: 'C' }
+                ]
+            },
+            {
+                id: 9,
+                options: [
+                    { text: "Suka tantangan", type: 'D' },
+                    { text: "Mudah disukai banyak orang", type: 'I' },
+                    { text: "Setia pada rutinitas", type: 'S' },
+                    { text: "Akurat dan hati-hati", type: 'C' }
+                ]
+            },
+            {
+                id: 10,
+                options: [
+                    { text: "Berani konfrontasi", type: 'D' },
+                    { text: "Mudah membangun hubungan", type: 'I' },
+                    { text: "Tidak suka konflik", type: 'S' },
+                    { text: "Suka menganalisis segala sesuatu", type: 'C' }
+                ]
+            },
+            {
+                id: 11,
+                options: [
+                    { text: "Suka menjadi yang terdepan", type: 'D' },
+                    { text: "Suka bekerja dalam tim", type: 'I' },
+                    { text: "Penuh kesabaran", type: 'S' },
+                    { text: "Suka pemikiran logis", type: 'C' }
+                ]
+            },
+            {
+                id: 12,
+                options: [
+                    { text: "Dorongan kuat untuk menang", type: 'D' },
+                    { text: "Senang memberi motivasi", type: 'I' },
+                    { text: "Pendengar yang suportif", type: 'S' },
+                    { text: "Suka laporan detail", type: 'C' }
+                ]
+            },
+            {
+                id: 13,
+                options: [
+                    { text: "Berorientasi tindakan", type: 'D' },
+                    { text: "Emosional dan ekspresif", type: 'I' },
+                    { text: "Konsisten dan bisa diprediksi", type: 'S' },
+                    { text: "Mengutamakan akurasi", type: 'C' }
+                ]
+            },
+            {
+                id: 14,
+                options: [
+                    { text: "Senang menentukan arah", type: 'D' },
+                    { text: "Energik dan ceria", type: 'I' },
+                    { text: "Suka kedamaian", type: 'S' },
+                    { text: "Suka memvalidasi dan mengecek ulang", type: 'C' }
+                ]
+            },
+            {
+                id: 15,
+                options: [
+                    { text: "Menyukai kontrol", type: 'D' },
+                    { text: "Mudah bersosialisasi", type: 'I' },
+                    { text: "Suka pekerjaan stabil", type: 'S' },
+                    { text: "Menyukai ketelitian", type: 'C' }
+                ]
+            },
+            {
+                id: 16,
+                options: [
+                    { text: "Menuntut hasil tinggi", type: 'D' },
+                    { text: "Suka menjadi pusat perhatian", type: 'I' },
+                    { text: "Empati tinggi", type: 'S' },
+                    { text: "Menghindari kesalahan", type: 'C' }
+                ]
+            },
+            {
+                id: 17,
+                options: [
+                    { text: "Kompetitif dalam segala hal", type: 'D' },
+                    { text: "Optimis menghadapi tantangan", type: 'I' },
+                    { text: "Sangat kooperatif", type: 'S' },
+                    { text: "Objektif dalam menilai", type: 'C' }
+                ]
+            },
+            {
+                id: 18,
+                options: [
+                    { text: "Berorientasi target", type: 'D' },
+                    { text: "Antusias dan komunikatif", type: 'I' },
+                    { text: "Setia dan dapat diandalkan", type: 'S' },
+                    { text: "Suka bekerja sendiri dengan tenang", type: 'C' }
+                ]
+            },
+            {
+                id: 19,
+                options: [
+                    { text: "Senang menyelesaikan masalah", type: 'D' },
+                    { text: "Menyukai suasana ramai", type: 'I' },
+                    { text: "Suka mendukung orang lain", type: 'S' },
+                    { text: "Mengutamakan logika", type: 'C' }
+                ]
+            },
+            {
+                id: 20,
+                options: [
+                    { text: "Berani mengambil keputusan sulit", type: 'D' },
+                    { text: "Suka aktivitas spontan", type: 'I' },
+                    { text: "Stabil dan penuh perhatian", type: 'S' },
+                    { text: "Sangat teliti pada detail kecil", type: 'C' }
+                ]
+            },
+            {
+                id: 21,
+                options: [
+                    { text: "Suka tantangan besar", type: 'D' },
+                    { text: "Kreatif dan suka berbagi cerita", type: 'I' },
+                    { text: "Slow but sure", type: 'S' },
+                    { text: "Suka riset dan data teknis", type: 'C' }
+                ]
+            },
+            {
+                id: 22,
+                options: [
+                    { text: "Tidak takut konflik", type: 'D' },
+                    { text: "Ramah dan ceria", type: 'I' },
+                    { text: "Menghindari perubahan mendadak", type: 'S' },
+                    { text: "Mengikuti SOP ketat", type: 'C' }
+                ]
+            },
+            {
+                id: 23,
+                options: [
+                    { text: "Tegas dan cepat", type: 'D' },
+                    { text: "Menghibur dan memotivasi", type: 'I' },
+                    { text: "Damai dan tidak tergesa-gesa", type: 'S' },
+                    { text: "Fakta harus jelas", type: 'C' }
+                ]
+            },
+            {
+                id: 24,
+                options: [
+                    { text: "Berorientasi hasil akhir", type: 'D' },
+                    { text: "Suka ekspresi bebas", type: 'I' },
+                    { text: "Konsisten dan harmonis", type: 'S' },
+                    { text: "Berpikir sistematis", type: 'C' }
+                ]
+            }
+        ];
+
+        // Init: Set default date
+        document.getElementById('testDate').valueAsDate = new Date();
+
+        // Variables to store current result for WhatsApp
+        let currentResultData = {
+            name: '',
+            date: '',
+            scores: {},
+            dominant: ''
+        };
+
+        // Render Questions
+        const container = document.getElementById('questionsContainer');
+        
+        questions.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = "bg-white p-6 rounded-lg shadow border border-gray-200";
+            
+            // Header: Number
+            const header = document.createElement('div');
+            header.className = "flex items-center mb-4 pb-2 border-b";
+            header.innerHTML = `<span class="bg-blue-900 text-white w-8 h-8 flex items-center justify-center rounded-full font-bold mr-3">${q.id}</span>
+                                <h3 class="text-gray-500 text-sm font-medium">Pilih satu (P) dan satu (T)</h3>`;
+            card.appendChild(header);
+
+            // Table Header for Options
+            const table = document.createElement('div');
+            table.className = "w-full";
+            
+            // Generate Rows
+            q.options.forEach((opt, optIndex) => {
+                const row = document.createElement('div');
+                row.className = "option-row grid grid-cols-12 items-center py-2 gap-2";
+                
+                // Labels
+                const textCol = document.createElement('div');
+                textCol.className = "col-span-8 md:col-span-9 text-gray-800 font-medium text-sm md:text-base";
+                textCol.textContent = opt.text;
+
+                // Most (P) Input
+                const pCol = document.createElement('div');
+                pCol.className = "col-span-2 md:col-span-1 flex flex-col items-center justify-center";
+                pCol.innerHTML = `
+                    <label class="text-xs font-bold text-blue-600 mb-1 md:hidden">P</label>
+                    <input type="radio" name="q${q.id}_most" value="${opt.type}" 
+                           class="radio-custom text-blue-600 focus:ring-blue-500" 
+                           onclick="handleSelection(${q.id}, 'most', ${optIndex})">
+                `;
+
+                // Least (T) Input
+                const tCol = document.createElement('div');
+                tCol.className = "col-span-2 md:col-span-2 flex flex-col items-center justify-center";
+                tCol.innerHTML = `
+                    <label class="text-xs font-bold text-red-500 mb-1 md:hidden">T</label>
+                    <input type="radio" name="q${q.id}_least" value="${opt.type}" 
+                           class="radio-custom text-red-500 focus:ring-red-500"
+                           onclick="handleSelection(${q.id}, 'least', ${optIndex})">
+                `;
+
+                row.appendChild(textCol);
+                row.appendChild(pCol);
+                row.appendChild(tCol);
+                table.appendChild(row);
+            });
+
+            // Footer Legend for Desktop
+            const legend = document.createElement('div');
+            legend.className = "hidden md:grid grid-cols-12 text-xs text-gray-400 mt-2 pt-2 border-t border-dashed";
+            legend.innerHTML = `
+                <div class="col-span-9"></div>
+                <div class="col-span-1 text-center font-bold text-blue-600">P</div>
+                <div class="col-span-2 text-center font-bold text-red-500">T</div>
+            `;
+            table.appendChild(legend);
+
+            card.appendChild(table);
+            container.appendChild(card);
+        });
+
+        // Smart Selection Logic (Prevent same row selection)
+        function handleSelection(questionId, type, optionIndex) {
+            const mostRadios = document.getElementsByName(`q${questionId}_most`);
+            const leastRadios = document.getElementsByName(`q${questionId}_least`);
+
+            if (type === 'most') {
+                if (leastRadios[optionIndex].checked) {
+                    leastRadios[optionIndex].checked = false; 
+                }
+            } else if (type === 'least') {
+                if (mostRadios[optionIndex].checked) {
+                    mostRadios[optionIndex].checked = false; 
+                }
+            }
+        }
+
+        // Calculation Logic
+        function calculateScore(e) {
+            e.preventDefault();
+            
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.classList.add('hidden');
+
+            const scores = {
+                D: { P: 0, T: 0 },
+                I: { P: 0, T: 0 },
+                S: { P: 0, T: 0 },
+                C: { P: 0, T: 0 }
+            };
+
+            let unanseredQuestions = [];
+
+            for (let i = 1; i <= 24; i++) {
+                const most = document.querySelector(`input[name="q${i}_most"]:checked`);
+                const least = document.querySelector(`input[name="q${i}_least"]:checked`);
+
+                if (!most || !least) {
+                    unanseredQuestions.push(i);
+                } else {
+                    scores[most.value].P++;
+                    scores[least.value].T++;
+                }
+            }
+
+            const name = document.getElementById('userName').value;
+            const date = document.getElementById('testDate').value;
+
+            if (!name) {
+                errorDiv.classList.remove('hidden');
+                document.getElementById('errorText').innerText = "Mohon isi Nama Lengkap Anda.";
+                window.scrollTo(0,0);
+                return;
+            }
+
+            if (unanseredQuestions.length > 0) {
+                errorDiv.classList.remove('hidden');
+                document.getElementById('errorText').innerText = `Anda belum melengkapi jawaban nomor: ${unanseredQuestions.join(', ')}`;
+                document.querySelector(`input[name="q${unanseredQuestions[0]}_most"]`).closest('.bg-white').scrollIntoView({behavior: 'smooth'});
+                return;
+            }
+
+            // Save data for WhatsApp
+            currentResultData.name = name;
+            currentResultData.date = date;
+            currentResultData.scores = scores;
+
+            // Display Results
+            displayResults(scores, name);
+        }
+
+        function displayResults(scores, name) {
+            const resultSection = document.getElementById('resultSection');
+            const tbody = document.getElementById('scoreTableBody');
+            
+            document.getElementById('resultName').innerText = `Peserta: ${name}`;
+            tbody.innerHTML = '';
+
+            const types = [
+                { code: 'D', label: 'Dominance' },
+                { code: 'I', label: 'Influence' },
+                { code: 'S', label: 'Steadiness' },
+                { code: 'C', label: 'Compliance' }
+            ];
+
+            let highestP = -1;
+            let dominantType = '';
+
+            types.forEach(t => {
+                const pVal = scores[t.code].P;
+                const tVal = scores[t.code].T;
+                const change = pVal - tVal;
+
+                if (pVal > highestP) {
+                    highestP = pVal;
+                    dominantType = t.label;
+                } else if (pVal === highestP) {
+                    dominantType += ` / ${t.label}`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "bg-white border-b hover:bg-gray-50";
+                tr.innerHTML = `
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        <span class="font-bold text-lg">${t.code}</span> <span class="text-xs text-gray-500">(${t.label})</span>
+                    </th>
+                    <td class="px-6 py-4 text-center font-bold text-blue-600">${pVal}</td>
+                    <td class="px-6 py-4 text-center font-bold text-red-500">${tVal}</td>
+                    <td class="px-6 py-4 text-center font-bold text-gray-700">${change}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            currentResultData.dominant = dominantType;
+            document.getElementById('dominantType').innerText = dominantType;
+            
+            resultSection.classList.remove('hidden');
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function sendToWhatsapp() {
+            const phoneNumber = "6281410101477"; // Admin Number
+            const s = currentResultData.scores;
+            
+            // Format message
+            let message = `*HASIL TES KEPRIBADIAN DISC*\n\n`;
+            message += `Nama: ${currentResultData.name}\n`;
+            message += `Tanggal: ${currentResultData.date}\n\n`;
+            message += `*Rincian Skor:*\n`;
+            message += `D (Dominance): Most ${s.D.P} | Least ${s.D.T} | Change ${s.D.P - s.D.T}\n`;
+            message += `I (Influence): Most ${s.I.P} | Least ${s.I.T} | Change ${s.I.P - s.I.T}\n`;
+            message += `S (Steadiness): Most ${s.S.P} | Least ${s.S.T} | Change ${s.S.P - s.S.T}\n`;
+            message += `C (Compliance): Most ${s.C.P} | Least ${s.C.T} | Change ${s.C.P - s.C.T}\n\n`;
+            message += `*Tipe Dominan: ${currentResultData.dominant}*`;
+
+            const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
